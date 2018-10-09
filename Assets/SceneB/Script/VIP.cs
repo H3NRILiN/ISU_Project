@@ -13,7 +13,7 @@ public class VIP : MonoBehaviour {
 
     public Color m_DamagedColor=new Color(255,0,0);
 
-    float m_CurrentHealth;
+    [HideInInspector]public float m_CurrentHealth;
 
     Color m_OriginColor;
 

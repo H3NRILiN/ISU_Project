@@ -21,21 +21,37 @@ public class SceneBGameManager : MonoBehaviour {
     WaitForSeconds m_PlayingRoundWait;
     WaitForSeconds m_EndRoundWait;
 
-    public float m_EnemySpawnSpeed = 5;
+    public float m_EnemySpawnSpeed = 1;
     public float m_PrepareRoundDelay = 2;
+    public float m_PlayingRoundDelay = 2;
+    public float m_EndRoundDelay = 3;
+
+    float m_VIPCurrentHP;
 
     int m_CurrentRound;
     int m_GameMaxRounds;
 
+    string m_RoundScore;
 
 
     // Use this for initialization
     void Start () {
         m_EnemySpawnWait = new WaitForSeconds(m_EnemySpawnSpeed);
         m_PrepareRoundWait = new WaitForSeconds(m_PrepareRoundDelay);
+        m_PrepareRoundWait = new WaitForSeconds(m_PrepareRoundDelay);
+        m_PlayingRoundWait = new WaitForSeconds(m_PlayingRoundDelay);
+        m_EndRoundWait = new WaitForSeconds(m_EndRoundDelay);
+
+        m_VIPCurrentHP = m_VIP.GetComponent<VIP>().m_CurrentHealth;
+
         m_CurrentRound = 1;
+
+        StartCoroutine(GameLoop());
+
         GenerateQA();
+
         StartCoroutine(SpawnEnemys());
+
     }
 	
 
@@ -43,7 +59,7 @@ public class SceneBGameManager : MonoBehaviour {
 	void Update () {
     }
 
-
+    //GameLoop一次全部重整畫面狀態
     IEnumerator GameLoop()
     {
         yield return StartCoroutine(RoundLoop());
@@ -52,6 +68,7 @@ public class SceneBGameManager : MonoBehaviour {
 
     IEnumerator RoundLoop()
     {
+        Debug.Log("RoundLoop");
         yield return StartCoroutine(PrepareRound());
         yield return StartCoroutine(PlayingRound());
         yield return StartCoroutine(EndRound());
@@ -60,18 +77,52 @@ public class SceneBGameManager : MonoBehaviour {
 
     IEnumerator PrepareRound()
     {
+        //PrepareRound開時時玩家必須先把mergecube的物件放置到畫面指定地點開始準備遊戲
+        Debug.Log("Prepare");
+        m_RoundScore = string.Empty;
         yield return m_PrepareRoundWait;
     }
 
     
     IEnumerator PlayingRound()
     {
-        yield return m_PlayingRoundWait;
+        //PlayingRound在VIP血量少於等於0時 或是 病毒全數消除時結束, 如果VIP死亡會重新開始, 病毒全數消除則進到下一關
+        Debug.Log("Playing");
+
+
+
+        if (m_VIPCurrentHP <= 0)
+        {
+            yield return m_PlayingRoundWait;
+        }
+        
     }
 
 
     IEnumerator EndRound()
     {
+      //顯示最終結果,VIP死亡或是病毒全數消滅,依照剩餘血量給予S A B C D F(失敗)評分
+        Debug.Log("End");
+
+
+        switch ((int)m_VIPCurrentHP)
+        {
+            case 100:m_RoundScore = "S";
+                break;
+            case 90:m_RoundScore = "A";
+                break;
+            case 70:
+                m_RoundScore = "B";
+                break;
+            case 50:
+                m_RoundScore = "C";
+                break;
+            case 1:
+                m_RoundScore = "D";
+                break;
+            default: m_RoundScore = "Fail";
+                break;
+        }
         yield return m_EndRoundWait;
     }
 
