@@ -18,12 +18,10 @@ public class SceneBGameManager : MonoBehaviour {
 
     WaitForSeconds m_EnemySpawnWait;
     WaitForSeconds m_PrepareRoundWait;
-    WaitForSeconds m_PlayingRoundWait;
     WaitForSeconds m_EndRoundWait;
 
     public float m_EnemySpawnSpeed = 1;
     public float m_PrepareRoundDelay = 2;
-    public float m_PlayingRoundDelay = 2;
     public float m_EndRoundDelay = 3;
 
     float m_VIPCurrentHP;
@@ -33,13 +31,14 @@ public class SceneBGameManager : MonoBehaviour {
 
     string m_RoundScore;
 
+    bool m_IsWin;
+
 
     // Use this for initialization
     void Start () {
         m_EnemySpawnWait = new WaitForSeconds(m_EnemySpawnSpeed);
         m_PrepareRoundWait = new WaitForSeconds(m_PrepareRoundDelay);
         m_PrepareRoundWait = new WaitForSeconds(m_PrepareRoundDelay);
-        m_PlayingRoundWait = new WaitForSeconds(m_PlayingRoundDelay);
         m_EndRoundWait = new WaitForSeconds(m_EndRoundDelay);
 
         m_VIPCurrentHP = m_VIP.GetComponent<VIP>().m_CurrentHealth;
@@ -51,18 +50,24 @@ public class SceneBGameManager : MonoBehaviour {
         GenerateQA();
 
         StartCoroutine(SpawnEnemys());
-
     }
-	
+
 
 	// Update is called once per frame
 	void Update () {
     }
 
-    //GameLoop一次全部重整畫面狀態
+
+    //GameLoop一次全部重整畫面狀態>如果場數小於等於m_QA.Count>開始RoundLoop>開始Prepare>開始Playing
+         //如果贏了>開始End,場數+1>開始GameLoop
+         //如果輸了>開始End>開始GameLoop
+    //如果場數大於m_QA.Count>開始GameLoop
+    //...
     IEnumerator GameLoop()
     {
-        yield return StartCoroutine(RoundLoop());
+        if (m_CurrentRound <= m_QA.Count)
+            yield return StartCoroutine(RoundLoop());
+
     }
 
 
@@ -93,7 +98,7 @@ public class SceneBGameManager : MonoBehaviour {
 
         if (m_VIPCurrentHP <= 0)
         {
-            yield return m_PlayingRoundWait;
+            yield return null;
         }
         
     }
@@ -104,6 +109,13 @@ public class SceneBGameManager : MonoBehaviour {
       //顯示最終結果,VIP死亡或是病毒全數消滅,依照剩餘血量給予S A B C D F(失敗)評分
         Debug.Log("End");
 
+        if (m_VIPCurrentHP > 0)
+        {
+            if (m_VIPCurrentHP < 10)
+                m_VIPCurrentHP = 1;
+            else
+                m_VIPCurrentHP = ((int)m_VIPCurrentHP / 10) * 10;
+        }
 
         switch ((int)m_VIPCurrentHP)
         {
@@ -124,6 +136,12 @@ public class SceneBGameManager : MonoBehaviour {
                 break;
         }
         yield return m_EndRoundWait;
+    }
+
+
+    IEnumerator EndOfGame()
+    {
+        yield return null;
     }
 
 
