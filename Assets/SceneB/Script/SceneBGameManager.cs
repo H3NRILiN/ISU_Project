@@ -27,6 +27,8 @@ public class SceneBGameManager : MonoBehaviour {
     int m_CurrentRound;
     int m_GameMaxRounds;
 
+
+
     // Use this for initialization
     void Start () {
         m_EnemySpawnWait = new WaitForSeconds(m_EnemySpawnSpeed);
@@ -36,14 +38,15 @@ public class SceneBGameManager : MonoBehaviour {
         StartCoroutine(SpawnEnemys());
     }
 	
+
 	// Update is called once per frame
 	void Update () {
     }
+
+
     IEnumerator GameLoop()
     {
         yield return StartCoroutine(RoundLoop());
-
-
     }
 
 
@@ -117,7 +120,5 @@ public class SceneBGameManager : MonoBehaviour {
             else
                 Debug.LogWarning("QA中的第"+a+"區塊沒東西");
         }
-        
     }
-
 }
