@@ -63,13 +63,13 @@ public class SceneBGameManager : MonoBehaviour {
     
     IEnumerator PlayingRound()
     {
-        yield return null;
+        yield return m_PlayingRoundWait;
     }
 
 
     IEnumerator EndRound()
     {
-        yield return null;
+        yield return m_EndRoundWait;
     }
 
 
