@@ -9,4 +9,6 @@ public class QASystemProfile : ScriptableObject {
     public string[] m_AnswersContent;
 
     public int m_CorrectAns;
+
+    public int m_EnemyCounts;
 }

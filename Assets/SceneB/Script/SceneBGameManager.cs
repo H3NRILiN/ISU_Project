@@ -4,17 +4,22 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class SceneBGameManager : MonoBehaviour {
-    public Text m_Question;
 
     public GameObject m_AnswerPrefab;
     public GameObject m_EnemyPrefab;
     public GameObject m_VIP;
+    public GameObject m_QuestionSlot;
+    public GameObject m_AnswerSlot;
 
-    public Transform m_AnswerPerfabParent;
+    public Text m_RoundEndText;
+    public Text m_RoundScoreText;
+    public Text m_Question;
 
     public List<EnemyManager> m_Enemys;
 
     public List<QASystemProfile> m_QA;
+
+    public int m_CurrentEnemyLeft;
 
     WaitForSeconds m_EnemySpawnWait;
     WaitForSeconds m_PrepareRoundWait;
@@ -36,25 +41,15 @@ public class SceneBGameManager : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
-        m_EnemySpawnWait = new WaitForSeconds(m_EnemySpawnSpeed);
-        m_PrepareRoundWait = new WaitForSeconds(m_PrepareRoundDelay);
-        m_PrepareRoundWait = new WaitForSeconds(m_PrepareRoundDelay);
-        m_EndRoundWait = new WaitForSeconds(m_EndRoundDelay);
-
-        m_VIPCurrentHP = m_VIP.GetComponent<VIP>().m_CurrentHealth;
-
-        m_CurrentRound = 1;
+        SetAll();
 
         StartCoroutine(GameLoop());
-
-        GenerateQA();
-
-        StartCoroutine(SpawnEnemys());
     }
 
 
 	// Update is called once per frame
 	void Update () {
+        m_VIPCurrentHP = m_VIP.GetComponent<VIP>().m_CurrentHealth;
     }
 
 
@@ -84,7 +79,9 @@ public class SceneBGameManager : MonoBehaviour {
     {
         //PrepareRound開時時玩家必須先把mergecube的物件放置到畫面指定地點開始準備遊戲
         Debug.Log("Prepare");
-        m_RoundScore = string.Empty;
+        DisableUI();
+        EnableUI();
+        Prepare();
         yield return m_PrepareRoundWait;
     }
 
@@ -94,9 +91,10 @@ public class SceneBGameManager : MonoBehaviour {
         //PlayingRound在VIP血量少於等於0時 或是 病毒全數消除時結束, 如果VIP死亡會重新開始, 病毒全數消除則進到下一關
         Debug.Log("Playing");
 
+        StartCoroutine(SpawnEnemys());
 
 
-        if (m_VIPCurrentHP <= 0)
+        while (m_VIPCurrentHP != 0&&m_CurrentEnemyLeft!=0)
         {
             yield return null;
         }
@@ -106,35 +104,20 @@ public class SceneBGameManager : MonoBehaviour {
 
     IEnumerator EndRound()
     {
-      //顯示最終結果,VIP死亡或是病毒全數消滅,依照剩餘血量給予S A B C D F(失敗)評分
+        //顯示最終結果,VIP死亡或是病毒全數消滅,依照剩餘血量給予S A B C D F(失敗)評分
         Debug.Log("End");
 
-        if (m_VIPCurrentHP > 0)
+        DisableUI();
+
+        for (int i = 0; i < GameObject.FindGameObjectsWithTag("Enemy").Length; i++)
         {
-            if (m_VIPCurrentHP < 10)
-                m_VIPCurrentHP = 1;
-            else
-                m_VIPCurrentHP = ((int)m_VIPCurrentHP / 10) * 10;
+            Destroy(GameObject.FindGameObjectsWithTag("Enemy")[i]);
         }
 
-        switch ((int)m_VIPCurrentHP)
-        {
-            case 100:m_RoundScore = "S";
-                break;
-            case 90:m_RoundScore = "A";
-                break;
-            case 70:
-                m_RoundScore = "B";
-                break;
-            case 50:
-                m_RoundScore = "C";
-                break;
-            case 1:
-                m_RoundScore = "D";
-                break;
-            default: m_RoundScore = "Fail";
-                break;
-        }
+        m_RoundScore = RoundScore();
+        Debug.Log(m_RoundScore);
+        m_RoundScoreText.text = "評價 " + m_RoundScore;
+
         yield return m_EndRoundWait;
     }
 
@@ -155,6 +138,7 @@ public class SceneBGameManager : MonoBehaviour {
             {
                 m_Enemys[i].m_Instane = Instantiate(m_EnemyPrefab);
                 m_Enemys[i].m_Instane.GetComponent<Enemy>().VIP = m_VIP;
+                m_Enemys[i].m_Instane.GetComponent<Enemy>().m_GameManager = this;
                 m_Enemys[i].SpawnEnemy();
                 yield return m_EnemySpawnWait;
             }
@@ -162,12 +146,58 @@ public class SceneBGameManager : MonoBehaviour {
             {
                 yield return null;
             }
-            StartCoroutine(SpawnEnemys());
+            if (m_CurrentEnemyLeft >0&&m_VIPCurrentHP>0)
+                StartCoroutine(SpawnEnemys());
         }
     }
 
 
-    void GenerateQA()
+    void SetAll()
+    {
+        m_EnemySpawnWait = new WaitForSeconds(m_EnemySpawnSpeed);
+        m_PrepareRoundWait = new WaitForSeconds(m_PrepareRoundDelay);
+        m_PrepareRoundWait = new WaitForSeconds(m_PrepareRoundDelay);
+        m_EndRoundWait = new WaitForSeconds(m_EndRoundDelay);
+
+        m_VIPCurrentHP = m_VIP.GetComponent<VIP>().m_CurrentHealth;
+
+        m_CurrentRound = 1;
+    }
+
+
+    void RestAll()
+    {
+
+    }
+
+
+    void EnableUI()
+    {
+        m_RoundEndText.text = string.Empty;
+        m_RoundScoreText.text = string.Empty;
+
+        m_QuestionSlot.SetActive(true);
+
+        m_AnswerSlot.SetActive(true);
+    }
+
+
+    void DisableUI()
+    { 
+        m_QuestionSlot.SetActive(false);
+
+        m_AnswerSlot.SetActive(false);
+
+        for (int i = 0; i < m_AnswerSlot.transform.childCount; i++)
+        {
+            Destroy(m_AnswerSlot.transform.GetChild(i).gameObject);
+        }
+    }
+
+
+    //a是目前回合數也是QASystemProfile的element位置
+    //b是每個答案的element位置
+    void Prepare()
     {
         m_GameMaxRounds = m_QA.Count;
         if (m_QA.Count > 0)
@@ -176,10 +206,11 @@ public class SceneBGameManager : MonoBehaviour {
             if (m_QA[a] != null)
             {
                 m_Question.text = m_QA[a].m_Question;
+                m_CurrentEnemyLeft = m_QA[a].m_EnemyCounts;
 
                 for (int b = 0; b < m_QA[a].m_AnswersContent.Length; b++)
                 {
-                    GameObject answer = Instantiate(m_AnswerPrefab, m_AnswerPerfabParent);
+                    GameObject answer = Instantiate(m_AnswerPrefab, m_AnswerSlot.transform);
                     answer.GetComponentInChildren<Text>().text = m_QA[a].m_AnswersContent[b];
                     Answer Ans = answer.GetComponent<Answer>();
                     Ans.m_CorrectAns = m_QA[a].m_CorrectAns;
@@ -189,5 +220,50 @@ public class SceneBGameManager : MonoBehaviour {
             else
                 Debug.LogWarning("QA中的第"+a+"區塊沒東西");
         }
+    }
+
+    
+    string RoundScore()
+    {
+        string roundscore=string.Empty;
+        
+
+        if (m_VIPCurrentHP > 0)
+        {
+            if (m_VIPCurrentHP < 10)
+                m_VIPCurrentHP = 1;
+            else
+                m_VIPCurrentHP = ((int)m_VIPCurrentHP / 10) * 10;
+        }
+
+        switch ((int)m_VIPCurrentHP)
+        {
+            case 100:
+                roundscore = "S";
+                break;
+            case 90:
+                roundscore = "A";
+                break;
+            case 80:
+            case 70:
+                roundscore = "B";
+                break;
+            case 60:
+            case 50:
+                roundscore = "C";
+                break;
+            case 40:
+            case 30:
+            case 20:
+            case 10:
+            case 1:
+                roundscore = "D";
+                break;
+            default:
+                roundscore = "Fail";
+                break;
+        }
+
+        return roundscore;
     }
 }

@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Enemy : MonoBehaviour {
     public GameObject VIP;
+    public SceneBGameManager m_GameManager;
 
     public float m_RotateSpeed = 30f;
     public float m_MoveSpeed = .5f;
@@ -17,6 +18,7 @@ public class Enemy : MonoBehaviour {
 
     private void Awake()
     {
+
         m_rigidbody = GetComponent<Rigidbody>();
 
         m_RotateAngle = Random.rotation;
@@ -59,10 +61,20 @@ public class Enemy : MonoBehaviour {
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.GetComponent<VIP>() != null)
+        if (other.gameObject.tag=="VIP")
         {
-            VIP vip = other.GetComponent<VIP>();
-            vip.TakeDamage(m_Damage);
+            if (other.GetComponent<VIP>() != null)
+            {
+                VIP vip = VIP.GetComponent<VIP>();
+                m_GameManager.m_CurrentEnemyLeft -= 1;
+                vip.TakeDamage(m_Damage);
+                Destroy(this.gameObject);
+            }
+        }
+        else if (other.gameObject.tag == "Player")
+        {
+            Debug.Log("阿");
+            m_GameManager.m_CurrentEnemyLeft -= 1;
             Destroy(this.gameObject);
         }
     }
