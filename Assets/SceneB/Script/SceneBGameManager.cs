@@ -86,6 +86,12 @@ public class SceneBGameManager : MonoBehaviour {
     {
         if (m_CurrentRound <= m_QA.Count)
             yield return StartCoroutine(RoundLoop());
+        else
+        {
+            DisableUI();
+            m_RoundEndText.text = "結束";
+            m_RoundScoreText.text = string.Empty;
+        }
 
 
     }
@@ -108,6 +114,10 @@ public class SceneBGameManager : MonoBehaviour {
         DisableUI();
         EnableUI();
         Prepare();
+
+        m_RoundEndText.text = string.Empty;
+        m_RoundScoreText.text = string.Empty;
+
         yield return m_PrepareRoundWait;
     }
 
@@ -143,6 +153,9 @@ public class SceneBGameManager : MonoBehaviour {
         m_RoundEndText.text = GetRoundWinLose();
 
         m_RoundScoreText.text = "評價 " + GetRoundScore();
+
+        if (m_IsWin == true)
+            m_CurrentRound += 1;
 
         yield return m_EndRoundWait;
     }
@@ -194,9 +207,6 @@ public class SceneBGameManager : MonoBehaviour {
     void EnableUI()
     {
         m_VIP.gameObject.SetActive(true);
-
-        m_RoundEndText.text = string.Empty;
-        m_RoundScoreText.text = string.Empty;
 
         m_QuestionSlot.SetActive(true);
 
@@ -257,6 +267,11 @@ public class SceneBGameManager : MonoBehaviour {
             if (m_VIPCurrentHP != 0)
                 m_IsWin = true;
             else
+                m_IsWin = false;
+        }
+        else
+        {
+            if (m_VIPCurrentHP == 0)
                 m_IsWin = false;
         }
 
