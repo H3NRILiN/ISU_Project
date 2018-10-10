@@ -7,7 +7,6 @@ public class SceneBGameManager : MonoBehaviour {
 
     public GameObject m_AnswerPrefab;
     public GameObject m_EnemyPrefab;
-    public GameObject m_VIP;
     public GameObject m_QuestionSlot;
     public GameObject m_AnswerSlot;
 
@@ -19,15 +18,20 @@ public class SceneBGameManager : MonoBehaviour {
 
     public List<QASystemProfile> m_QA;
 
-    public int m_CurrentEnemyLeft;
+    public VIP m_VIP;
 
-    WaitForSeconds m_EnemySpawnWait;
-    WaitForSeconds m_PrepareRoundWait;
-    WaitForSeconds m_EndRoundWait;
+    [HideInInspector]public int m_CurrentEnemyLeft;
 
     public float m_EnemySpawnSpeed = 1;
     public float m_PrepareRoundDelay = 2;
     public float m_EndRoundDelay = 3;
+
+    public enum ControlMode {MergeCube,Mouse };
+    public ControlMode m_ControlMode;
+
+    WaitForSeconds m_EnemySpawnWait;
+    WaitForSeconds m_PrepareRoundWait;
+    WaitForSeconds m_EndRoundWait;
 
     float m_VIPCurrentHP;
 
@@ -41,6 +45,7 @@ public class SceneBGameManager : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
+
         SetAll();
 
         StartCoroutine(GameLoop());
@@ -50,6 +55,25 @@ public class SceneBGameManager : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
         m_VIPCurrentHP = m_VIP.GetComponent<VIP>().m_CurrentHealth;
+
+        if (m_CurrentEnemyLeft < 0)
+            m_CurrentEnemyLeft = 0;
+        if (m_VIPCurrentHP < 0)
+            m_VIPCurrentHP = 0;
+
+    }
+
+
+    void ControlModeSelect()
+    {
+        if (m_ControlMode == ControlMode.MergeCube)
+        {
+
+        }
+        if (m_ControlMode == ControlMode.Mouse)
+        {
+
+        }
     }
 
 
@@ -63,6 +87,7 @@ public class SceneBGameManager : MonoBehaviour {
         if (m_CurrentRound <= m_QA.Count)
             yield return StartCoroutine(RoundLoop());
 
+
     }
 
 
@@ -72,6 +97,7 @@ public class SceneBGameManager : MonoBehaviour {
         yield return StartCoroutine(PrepareRound());
         yield return StartCoroutine(PlayingRound());
         yield return StartCoroutine(EndRound());
+        StartCoroutine(GameLoop());
     }
 
 
@@ -114,9 +140,9 @@ public class SceneBGameManager : MonoBehaviour {
             Destroy(GameObject.FindGameObjectsWithTag("Enemy")[i]);
         }
 
-        m_RoundScore = RoundScore();
-        Debug.Log(m_RoundScore);
-        m_RoundScoreText.text = "評價 " + m_RoundScore;
+        m_RoundEndText.text = GetRoundWinLose();
+
+        m_RoundScoreText.text = "評價 " + GetRoundScore();
 
         yield return m_EndRoundWait;
     }
@@ -137,7 +163,7 @@ public class SceneBGameManager : MonoBehaviour {
             if (m_Enemys[i].m_SpawnPoint.gameObject.activeInHierarchy)
             {
                 m_Enemys[i].m_Instane = Instantiate(m_EnemyPrefab);
-                m_Enemys[i].m_Instane.GetComponent<Enemy>().VIP = m_VIP;
+                m_Enemys[i].m_Instane.GetComponent<Enemy>().VIP = m_VIP.gameObject;
                 m_Enemys[i].m_Instane.GetComponent<Enemy>().m_GameManager = this;
                 m_Enemys[i].SpawnEnemy();
                 yield return m_EnemySpawnWait;
@@ -159,20 +185,16 @@ public class SceneBGameManager : MonoBehaviour {
         m_PrepareRoundWait = new WaitForSeconds(m_PrepareRoundDelay);
         m_EndRoundWait = new WaitForSeconds(m_EndRoundDelay);
 
-        m_VIPCurrentHP = m_VIP.GetComponent<VIP>().m_CurrentHealth;
+        m_VIPCurrentHP = m_VIP.m_CurrentHealth;
 
         m_CurrentRound = 1;
     }
 
 
-    void RestAll()
-    {
-
-    }
-
-
     void EnableUI()
     {
+        m_VIP.gameObject.SetActive(true);
+
         m_RoundEndText.text = string.Empty;
         m_RoundScoreText.text = string.Empty;
 
@@ -183,7 +205,9 @@ public class SceneBGameManager : MonoBehaviour {
 
 
     void DisableUI()
-    { 
+    {
+        m_VIP.gameObject.SetActive(false);
+
         m_QuestionSlot.SetActive(false);
 
         m_AnswerSlot.SetActive(false);
@@ -199,6 +223,8 @@ public class SceneBGameManager : MonoBehaviour {
     //b是每個答案的element位置
     void Prepare()
     {
+        m_VIP.m_CurrentHealth = m_VIP.m_BaseHealth;
+        m_VIP.SetText();
         m_GameMaxRounds = m_QA.Count;
         if (m_QA.Count > 0)
         {
@@ -222,8 +248,31 @@ public class SceneBGameManager : MonoBehaviour {
         }
     }
 
+
+    string GetRoundWinLose()
+    {
+        string roundwinlose = string.Empty;
+        if (m_CurrentEnemyLeft == 0)
+        {
+            if (m_VIPCurrentHP != 0)
+                m_IsWin = true;
+            else
+                m_IsWin = false;
+        }
+
+        if (m_IsWin)
+        {
+            roundwinlose = "獲勝";
+        }
+        else
+            roundwinlose = "失敗!再來一次吧";
+
+
+        return roundwinlose;
+    }
+
     
-    string RoundScore()
+    string GetRoundScore()
     {
         string roundscore=string.Empty;
         
@@ -266,4 +315,6 @@ public class SceneBGameManager : MonoBehaviour {
 
         return roundscore;
     }
+
+    
 }

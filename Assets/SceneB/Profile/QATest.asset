@@ -17,3 +17,4 @@ MonoBehaviour:
   - b
   - c
   m_CorrectAns: 1
+  m_EnemyCounts: 50

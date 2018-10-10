@@ -129,7 +129,7 @@ MonoBehaviour:
   VIP: {fileID: 0}
   m_GameManager: {fileID: 0}
   m_RotateSpeed: 180
-  m_MoveSpeed: 0.2
+  m_MoveSpeed: 1.5
   m_Damage: 5
 --- !u!198 &198447922520450590
 ParticleSystem:
