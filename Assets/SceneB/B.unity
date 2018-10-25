@@ -351,6 +351,7 @@ GameObject:
   - component: {fileID: 128718592}
   - component: {fileID: 128718591}
   - component: {fileID: 128718590}
+  - component: {fileID: 128718593}
   m_Layer: 8
   m_Name: MagicStick
   m_TagString: Player
@@ -369,8 +370,8 @@ Transform:
   m_LocalScale: {x: 0.1, y: 0.5, z: 0.10000001}
   m_Children:
   - {fileID: 885865614}
-  m_Father: {fileID: 1162682685}
-  m_RootOrder: 1
+  m_Father: {fileID: 0}
+  m_RootOrder: 12
   m_LocalEulerAnglesHint: {x: 45, y: 0, z: 0}
 --- !u!135 &128718590
 SphereCollider:
@@ -426,6 +427,46 @@ MeshFilter:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 128718588}
   m_Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &128718593
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 128718588}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c5371c43d1ada7a469e1a24e782ebe4b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Follower: {fileID: 146265491}
+--- !u!1 &146265490
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 146265491}
+  m_Layer: 0
+  m_Name: Follow
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &146265491
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 146265490}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1162682685}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &297169691
 GameObject:
   m_ObjectHideFlags: 0
@@ -1063,7 +1104,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: f304dca97e613ee4ebe34cc7976df688, type: 2}
   m_VIP: {fileID: 850934826}
   m_CurrentEnemyLeft: 0
-  m_EnemySpawnSpeed: 0.59
+  m_EnemySpawnSpeed: 0.8
   m_PrepareRoundDelay: 2
   m_EndRoundDelay: 4
   m_ControlMode: 0

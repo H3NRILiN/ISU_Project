@@ -11,12 +11,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 228e3321563e66a47929c45ab307ca1e, type: 3}
   m_Name: Part1QA
   m_EditorClassIdentifier: 
-  m_Question: "\u4F60\u662F\u767D\u7661\u55CE?"
+  m_Question: "\u554F\u984C1"
   m_AnswersContent:
-  - "\u662F"
-  - "\u4E0D\u662FR"
-  - "\u53EF\u80FD"
-  - "\u53EF\u80FD"
-  - "\u53EF\u80FD"
+  - A
+  - B
+  - C
+  - D
+  - E
   m_CorrectAns: 0
-  m_EnemyCounts: 25
+  m_EnemyCounts: 10
